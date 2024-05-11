@@ -22,7 +22,7 @@
 #include <android/log.h>
 #include <hidl/HidlTransportSupport.h>
 #include <hardware/power.h>
-#include "Power.h"
+#include "Power-hidl.h"
 
 using android::sp;
 using android::status_t;

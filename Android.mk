@@ -32,8 +32,8 @@ LOCAL_SHARED_LIBRARIES := \
     vendor.nvidia.hardware.power@1.0
 
 LOCAL_SRC_FILES := \
-    service.cpp \
-    Power.cpp \
+    service-hidl.cpp \
+    Power-hidl.cpp \
     nvpowerhal.cpp \
     timeoutpoker.cpp \
     powerhal_parser.cpp \

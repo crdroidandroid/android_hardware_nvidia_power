@@ -24,7 +24,7 @@
 
 #include <android/log.h>
 #include <utils/Log.h>
-#include "Power.h"
+#include "Power-hidl.h"
 #include "tegra_sata_hal.h"
 
 namespace vendor {
