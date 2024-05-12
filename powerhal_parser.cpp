@@ -29,8 +29,6 @@
 #include "powerhal_utils.h"
 #include "powerhal.h"
 
-using ::vendor::nvidia::hardware::power::V1_0::ExtPowerHint;
-
 #define XML_FILE_PREFIX "powerhal."
 #define XML_FILE_SUFFIX ".xml"
 #define MAX_LINE_SIZE 256
@@ -102,24 +100,24 @@ static void reset_hint(power_hint_data_t *hint)
 
 namespace {
 
-const std::map<std::string, ExtPowerHint> power_hint_ids = {
-        {"VSYNC",             ExtPowerHint::VSYNC},
-        {"INTERACTION",       ExtPowerHint::INTERACTION},
-        {"VIDEO_ENCODE",      ExtPowerHint::VIDEO_ENCODE},
-        {"VIDEO_DECODE",      ExtPowerHint::VIDEO_DECODE},
-        {"LOW_POWER",         ExtPowerHint::LOW_POWER},
-        {"APP_PROFILE",       ExtPowerHint::APP_PROFILE},
-        {"APP_LAUNCH",        ExtPowerHint::APP_LAUNCH},
-        {"SHIELD_STREAMING",  ExtPowerHint::SHIELD_STREAMING},
-        {"HIGH_RES_VIDEO",    ExtPowerHint::HIGH_RES_VIDEO},
-        {"MIRACAST",          ExtPowerHint::MIRACAST},
-        {"DISPLAY_ROTATION",  ExtPowerHint::DISPLAY_ROTATION},
-        {"CAMERA",            ExtPowerHint::CAMERA},
-        {"MULTITHREAD_BOOST", ExtPowerHint::MULTITHREAD_BOOST},
-        {"AUDIO_SPEAKER",     ExtPowerHint::AUDIO_SPEAKER},
-        {"AUDIO_OTHER",       ExtPowerHint::AUDIO_OTHER},
-        {"POWER_MODE",        ExtPowerHint::POWER_MODE},
-        {"AUDIO_LOW_LATENCY", ExtPowerHint::AUDIO_LOW_LATENCY}
+const std::map<std::string, NvPowerHint> power_hint_ids = {
+        {"VSYNC",             NvPowerHint::VSYNC},
+        {"INTERACTION",       NvPowerHint::INTERACTION},
+        {"VIDEO_ENCODE",      NvPowerHint::VIDEO_ENCODE},
+        {"VIDEO_DECODE",      NvPowerHint::VIDEO_DECODE},
+        {"LOW_POWER",         NvPowerHint::LOW_POWER},
+        {"APP_PROFILE",       NvPowerHint::APP_PROFILE},
+        {"APP_LAUNCH",        NvPowerHint::APP_LAUNCH},
+        {"SHIELD_STREAMING",  NvPowerHint::SHIELD_STREAMING},
+        {"HIGH_RES_VIDEO",    NvPowerHint::HIGH_RES_VIDEO},
+        {"MIRACAST",          NvPowerHint::MIRACAST},
+        {"DISPLAY_ROTATION",  NvPowerHint::DISPLAY_ROTATION},
+        {"CAMERA",            NvPowerHint::CAMERA},
+        {"MULTITHREAD_BOOST", NvPowerHint::MULTITHREAD_BOOST},
+        {"AUDIO_SPEAKER",     NvPowerHint::AUDIO_SPEAKER},
+        {"AUDIO_OTHER",       NvPowerHint::AUDIO_OTHER},
+        {"POWER_MODE",        NvPowerHint::POWER_MODE},
+        {"AUDIO_LOW_LATENCY", NvPowerHint::AUDIO_LOW_LATENCY}
 };
 
 class XmlElement {
@@ -256,7 +254,7 @@ class XmlElementHint : public XmlElement {
                 XmlElement(parent, children, "hint") {}
 
         virtual void parse(__attribute__((unused)) struct powerhal_info *pInfo, const char **attrs) {
-            m_hintId = static_cast<ExtPowerHint>(-1);
+            m_hintId = static_cast<NvPowerHint>(-1);
             for (; *attrs; attrs += 2) {
                 if (strcmp(attrs[0], "name")) {
                     ALOGE("Unknown hint attribute: %s", attrs[0]);
@@ -272,15 +270,15 @@ class XmlElementHint : public XmlElement {
         }
 
         virtual void finish(__attribute__((unused)) struct powerhal_info *pInfo) {
-            m_hintId = static_cast<ExtPowerHint>(-1);
+            m_hintId = static_cast<NvPowerHint>(-1);
         }
 
-        ExtPowerHint hintId() const {
+        NvPowerHint hintId() const {
             return m_hintId;
         }
 
     private:
-        ExtPowerHint m_hintId;
+        NvPowerHint m_hintId;
 };
 
 class XmlElementHintInterval : public XmlElement {
@@ -291,8 +289,8 @@ class XmlElementHintInterval : public XmlElement {
 
         virtual void parse(struct powerhal_info *pInfo, const char **attrs) {
             auto parent_hint = static_cast<XmlElementHint*>(m_parent);
-            ExtPowerHint hint_id = parent_hint->hintId();
-            if (hint_id < static_cast<ExtPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
+            NvPowerHint hint_id = parent_hint->hintId();
+            if (hint_id < static_cast<NvPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
                 ALOGE("Invalid hint id: %d", hint_id);
                 return;
             }
@@ -319,8 +317,8 @@ class XmlElementHintCpu : public XmlElement {
 
         virtual void parse(struct powerhal_info *pInfo, const char **attrs) {
             auto parent_hint = static_cast<XmlElementHint*>(m_parent);
-            ExtPowerHint hint_id = parent_hint->hintId();
-            if (hint_id < static_cast<ExtPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
+            NvPowerHint hint_id = parent_hint->hintId();
+            if (hint_id < static_cast<NvPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
                 ALOGE("Invalid hint id: %d", hint_id);
                 return;
             }
@@ -368,8 +366,8 @@ class XmlElementHintGpu : public XmlElement {
 
         virtual void parse(struct powerhal_info *pInfo, const char **attrs) {
             auto parent_hint = static_cast<XmlElementHint*>(m_parent);
-            ExtPowerHint hint_id = parent_hint->hintId();
-            if (hint_id < static_cast<ExtPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
+            NvPowerHint hint_id = parent_hint->hintId();
+            if (hint_id < static_cast<NvPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
                 ALOGE("Invalid hint id: %d", hint_id);
                 return;
             }
@@ -388,8 +386,8 @@ class XmlElementHintEmc : public XmlElement {
 
         virtual void parse(struct powerhal_info *pInfo, const char **attrs) {
             auto parent_hint = static_cast<XmlElementHint*>(m_parent);
-            ExtPowerHint hint_id = parent_hint->hintId();
-            if (hint_id < static_cast<ExtPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
+            NvPowerHint hint_id = parent_hint->hintId();
+            if (hint_id < static_cast<NvPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
                 ALOGE("Invalid hint id: %d", hint_id);
                 return;
             }
@@ -408,8 +406,8 @@ class XmlElementHintOnlineCpus : public XmlElement {
 
         virtual void parse(struct powerhal_info *pInfo, const char **attrs) {
             auto parent_hint = static_cast<XmlElementHint*>(m_parent);
-            ExtPowerHint hint_id = parent_hint->hintId();
-            if (hint_id < static_cast<ExtPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
+            NvPowerHint hint_id = parent_hint->hintId();
+            if (hint_id < static_cast<NvPowerHint>(0) || hint_id >= POWER_HINT_MAX) {
                 ALOGE("Invalid hint id: %d", hint_id);
                 return;
             }

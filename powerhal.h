@@ -26,12 +26,8 @@
 #include "timeoutpoker.h"
 #include <semaphore.h>
 
+#include <map>
 #include <vector>
-
-#include <vendor/nvidia/hardware/power/1.0/IPower.h>
-
-using ::vendor::nvidia::hardware::power::V1_0::ExtPowerHint;
-using ::vendor::nvidia::hardware::power::V1_0::NvCPLHintData;
 
 #define MAX_CHARS 32
 
@@ -52,7 +48,60 @@ using ::vendor::nvidia::hardware::power::V1_0::NvCPLHintData;
 
 #define HARDWARE_TYPE_PROP "ro.hardware"
 
-#define POWER_HINT_MAX ExtPowerHint::FRAMERATE_DATA
+enum NvPowerHint {
+    // Hidl 1.0 hints
+    VSYNC                 =  1,
+    INTERACTION           =  2,
+    VIDEO_ENCODE          =  3,
+    VIDEO_DECODE          =  4,
+    LOW_POWER             =  5,
+    SUSTAINED_PERFORMANCE =  6,
+    VR_MODE               =  7,
+    LAUNCH                =  8,
+    // Hidl 1.0 ext hints
+    APP_PROFILE           =  9,
+    APP_LAUNCH            = 10,
+    SHIELD_STREAMING      = 11,
+    HIGH_RES_VIDEO        = 12,
+    POWER_MODE            = 13,
+    MIRACAST              = 14,
+    DISPLAY_ROTATION      = 15,
+    CAMERA                = 16,
+    MULTITHREAD_BOOST     = 17,
+    AUDIO_SPEAKER         = 18,
+    AUDIO_OTHER           = 19,
+    AUDIO_LOW_LATENCY     = 20,
+    CANCEL_PHS_HINT       = 21,
+    FRAMEWORKS_UI         = 22,
+    SF_BQL                = 23,
+    FRAMERATE_DATA        = 24,
+};
+
+enum CPLHintData {
+    NVCPL_HINT_MAX_PERF = 0,
+    NVCPL_HINT_OPT_PERF = 1,
+    NVCPL_HINT_BAT_SAVE = 2,
+    NVCPL_HINT_USR_CUST = 3,
+    NVCPL_HINT_COUNT    = 4,
+};
+
+enum NvAppProfileKnob {
+    APP_PROFILE_CPU_SCALING_MIN_FREQ              =  0,
+    APP_PROFILE_CPU_CORE_BIASi                    =  1,
+    APP_PROFILE_CPU_MAX_NORMAL_FREQ_IN_PERCENTAGE =  2,
+    APP_PROFILE_CPU_MAX_CORE                      =  3,
+    APP_PROFILE_GPU_CBUS_CAP_LEVEL                =  4,
+    APP_PROFILE_GPU_SCALING                       =  5,
+    APP_PROFILE_EDP_MODE                          =  6,
+    APP_PROFILE_PBC_POWER                         =  7,
+    APP_PROFILE_FAN_CAP                           =  8,
+    APP_PROFILE_VOLT_TEMP_MODE                    =  9,
+    APP_PROFILE_PRISM_CONTROL_ENABLE              = 10,
+    APP_PROFILE_CPU_MIN_CORE                      = 11,
+    APP_PROFILE_COUNT                             = 12,
+};
+
+#define POWER_HINT_MAX NvPowerHint::FRAMERATE_DATA
 
 struct input_dev_map {
     int dev_id;
@@ -84,7 +133,7 @@ typedef struct cpu_cluster_data {
     int fd_app_max_freq;
     int fd_vsync_min_freq;
 
-    std::map<ExtPowerHint,power_hint_data_t> hints;
+    std::map<NvPowerHint,power_hint_data_t> hints;
 } cpu_cluster_data_t;
 
 struct powerhal_info {
@@ -100,12 +149,12 @@ struct powerhal_info {
     std::vector<struct input_dev_map> input_devs;
 
     /* Time last hint was sent - in usec */
-    std::map<ExtPowerHint,uint64_t> hint_time;
-    std::map<ExtPowerHint,uint64_t> hint_interval;
+    std::map<NvPowerHint,uint64_t> hint_time;
+    std::map<NvPowerHint,uint64_t> hint_interval;
 
-    std::map<ExtPowerHint,power_hint_data_t> gpu_freq_hints;
-    std::map<ExtPowerHint,power_hint_data_t> emc_freq_hints;
-    std::map<ExtPowerHint,power_hint_data_t> online_cpu_hints;
+    std::map<NvPowerHint,power_hint_data_t> gpu_freq_hints;
+    std::map<NvPowerHint,power_hint_data_t> emc_freq_hints;
+    std::map<NvPowerHint,power_hint_data_t> online_cpu_hints;
 
     int boot_boost_time_ms;
 
@@ -156,7 +205,7 @@ void common_power_set_interactive(struct powerhal_info *pInfo, int on);
  * may result in adjustment of power/performance parameters of the
  * cpufreq governor and other controls.
 */
-void common_power_hint(struct powerhal_info *pInfo, ExtPowerHint hint, const void *data);
+void common_power_hint(struct powerhal_info *pInfo, NvPowerHint hint, const void *data);
 
 void set_power_level_floor(int on);
 #endif  //COMMON_POWER_HAL_H

@@ -57,7 +57,7 @@ Power::Power() {
 
 // Methods from ::vendor::nvidia::hardware::power::V1_0::IPower follow.
 Return<void> Power::powerHintExt(ExtPowerHint hint, const hidl_vec<int32_t>& data) {
-    common_power_hint(pInfo, hint, static_cast<const void*>(data.data()));
+    common_power_hint(pInfo, static_cast<NvPowerHint>(hint), static_cast<const void*>(data.data()));
     return Void();
 }
 
@@ -92,7 +92,7 @@ Return<void> Power::setInteractive(bool interactive)  {
 }
 
 Return<void> Power::powerHint(PowerHint hint, int32_t data) {
-    common_power_hint(pInfo, static_cast<ExtPowerHint>(hint), &data);
+    common_power_hint(pInfo, static_cast<NvPowerHint>(hint), &data);
     return Void();
 }
 
