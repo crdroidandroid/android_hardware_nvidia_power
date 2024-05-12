@@ -1,0 +1,8 @@
+on boot
+    start vendor.power-hal
+
+service vendor.power-hal /vendor/bin/hw/android.hardware.power-service-nvidia
+    class hal
+    user system
+    group system
+    disabled
