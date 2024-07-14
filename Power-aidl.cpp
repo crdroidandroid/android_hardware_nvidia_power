@@ -35,6 +35,8 @@ namespace nvidia {
 Power::Power() {
     pInfo = new powerhal_info();
 
+    common_power_open(pInfo);
+
     pInfo->input_devs.push_back({-1, "touch\n"});
     pInfo->input_devs.push_back({-1, "raydium_ts\n"});
 
